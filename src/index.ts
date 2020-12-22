@@ -2,3 +2,8 @@ export * from './interfaces';
 export * from './client';
 export * from './providers';
 export * from './types';
+export * from './event-store-core.module';
+export * from './event-store.bus';
+export * from './event-store.constants';
+export * from './event-store.module';
+export * from './event-store.publisher';
