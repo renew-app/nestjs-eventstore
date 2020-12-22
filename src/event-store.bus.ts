@@ -253,12 +253,7 @@ export class EventStoreBus implements OnModuleDestroy {
 
   reSubscribeToPersistentSubscription(stream: string, subscriptionName: string) {
     this.logger.warn(`Reconnecting to subscription ${subscriptionName} ${stream}...`);
-    setTimeout(
-      (st, subName) => this.subscribeToPersistentSubscription(st, subName),
-      3000,
-      stream,
-      subscriptionName,
-    );
+    setTimeout((st, subName) => this.subscribeToPersistentSubscription(st, subName), 3000, stream, subscriptionName);
   }
 
   addEventHandlers(eventHandlers: IEventConstructors) {
