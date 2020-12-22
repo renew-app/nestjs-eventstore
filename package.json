@@ -1,9 +1,9 @@
 {
   "name": "@renewapp/nestjs-eventstore",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "An implementation of the @eventstore/db-client for the Nestjs framework and working in cooperation with the built-in Nestjs CQRS infrastructure.",
   "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "types": "lib/**/*.d.ts",
   "scripts": {
     "test": "jest --config jestconfig.json --passWithNoTests",
     "build": "tsc",
