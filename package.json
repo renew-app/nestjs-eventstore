@@ -1,5 +1,5 @@
 {
-  "name": "@renew/nestjs-eventstore",
+  "name": "@renewapp/nestjs-eventstore",
   "version": "0.0.0",
   "description": "An implementation of the @eventstore/db-client for the Nestjs framework and working in cooperation with the built-in Nestjs CQRS infrastructure.",
   "main": "lib/index.js",
