@@ -99,16 +99,23 @@ export class EventStoreBus implements OnModuleDestroy {
               this.logger.verbose(
                 `Persistent Subscription - ${sub.persistentSubscriptionName}:${sub.stream} already exists. Skipping creation.`,
               );
+
+              return {
+                isLive: false,
+                isCreated: true,
+                stream: sub.stream,
+                subscription: sub.persistentSubscriptionName,
+              } as ExtendedPersistentSubscription;
             } else {
               this.logger.error(`[${sub.stream}][${sub.persistentSubscriptionName}] ${reason.message} ${reason.stack}`);
-            }
 
-            return {
-              isLive: false,
-              isCreated: false,
-              stream: sub.stream,
-              subscription: sub.persistentSubscriptionName,
-            } as ExtendedPersistentSubscription;
+              return {
+                isLive: false,
+                isCreated: false,
+                stream: sub.stream,
+                subscription: sub.persistentSubscriptionName,
+              } as ExtendedPersistentSubscription;
+            }
           });
       });
 
