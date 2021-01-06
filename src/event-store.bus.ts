@@ -55,7 +55,7 @@ export class EventStoreBus implements OnModuleDestroy {
 
     const createSubscriptionResults = await this.createMissingPersistentSubscriptions(subscriptions);
 
-    const availableSubscriptionsCount = createSubscriptionResults.filter(s => s.isCreated === true).length;
+    const availableSubscriptionsCount = createSubscriptionResults.filter((s) => s.isCreated === true).length;
 
     if (availableSubscriptionsCount === this.persistentSubscriptionsCount) {
       this.persistentSubscriptions = await Promise.all(
@@ -64,12 +64,14 @@ export class EventStoreBus implements OnModuleDestroy {
         }),
       );
     } else {
-      this.logger.error(`Not proceeding with subscribing to persistent subscriptions. Configured subscriptions ${this.persistentSubscriptionsCount} does not equal the created and available subscriptions ${availableSubscriptionsCount}.`);
+      this.logger.error(
+        `Not proceeding with subscribing to persistent subscriptions. Configured subscriptions ${this.persistentSubscriptionsCount} does not equal the created and available subscriptions ${availableSubscriptionsCount}.`,
+      );
     }
   }
 
   async createMissingPersistentSubscriptions(
-    subscriptions: EsPersistentSubscription[]
+    subscriptions: EsPersistentSubscription[],
   ): Promise<ExtendedPersistentSubscription[]> {
     const settings: PersistentSubscriptionSettings = persistentSubscriptionSettingsFromDefaults({
       resolveLinks: true,
@@ -77,7 +79,9 @@ export class EventStoreBus implements OnModuleDestroy {
 
     try {
       const subs = subscriptions.map(async (sub) => {
-        this.logger.verbose(`Starting to verify and create persistent subscription - [${sub.stream}][${sub.persistentSubscriptionName}]`);
+        this.logger.verbose(
+          `Starting to verify and create persistent subscription - [${sub.stream}][${sub.persistentSubscriptionName}]`,
+        );
 
         return this.client
           .createPersistentSubscription(sub.stream, sub.persistentSubscriptionName, settings)
@@ -96,7 +100,7 @@ export class EventStoreBus implements OnModuleDestroy {
                 `Persistent Subscription - ${sub.persistentSubscriptionName}:${sub.stream} already exists. Skipping creation.`,
               );
             } else {
-              this.logger.error(reason);
+              this.logger.error(`[${sub.stream}][${sub.persistentSubscriptionName}] ${reason.message} ${reason.stack}`);
             }
 
             return {
