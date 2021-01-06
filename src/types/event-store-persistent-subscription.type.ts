@@ -9,4 +9,7 @@ export type EventStorePersistentSubscription = {
 
 export interface ExtendedPersistentSubscription extends PersistentSubscription {
   isLive?: boolean;
+  isCreated?: boolean;
+  stream: string;
+  subscription: string;
 }
