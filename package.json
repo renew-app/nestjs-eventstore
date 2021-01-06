@@ -1,6 +1,6 @@
 {
   "name": "@renewapp/nestjs-eventstore",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "An implementation of the @eventstore/db-client for the Nestjs framework and working in cooperation with the built-in Nestjs CQRS infrastructure.",
   "main": "lib/index.js",
   "types": "lib/**/*.d.ts",
@@ -47,12 +47,13 @@
   },
   "dependencies": {
     "@eventstore/db-client": "0.0.0-alpha.9",
-    "@nestjs/common": "^7.6.4",
-    "@nestjs/core": "^7.6.4",
-    "@nestjs/cqrs": "^7.0.1",
-    "guid-typescript": "^1.0.9",
-    "reflect-metadata": "^0.1.13",
-    "rxjs": "^6.6.3"
+    "@nestjs/common": "7.6.4",
+    "@nestjs/core": "7.6.4",
+    "@nestjs/cqrs": "7.0.1",
+    "@types/debug": "4.1.5",
+    "guid-typescript": "1.0.9",
+    "reflect-metadata": "0.1.13",
+    "rxjs": "6.6.3"
   },
   "files": [
     "lib/**/*"
