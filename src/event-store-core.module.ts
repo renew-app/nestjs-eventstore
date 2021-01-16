@@ -8,7 +8,7 @@ import {
   EventStoreDnsClusterOptions,
   EventStoreGossipClusterOptions,
   EventStoreSingleNodeOptions,
-  IEventConstructors
+  IEventConstructors,
 } from './interfaces';
 
 import { EventStoreClient } from './client';
@@ -27,7 +27,7 @@ export class EventStoreCoreModule implements OnModuleInit {
     private readonly eventsBus: EventBus,
     private readonly commandsBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) { }
+  ) {}
 
   onModuleInit() {
     const { events, queries, sagas, commands } = this.explorerService.explore();
@@ -38,7 +38,11 @@ export class EventStoreCoreModule implements OnModuleInit {
   }
 
   static forRoot(
-    options: EventStoreConnectionStringOptions | EventStoreDnsClusterOptions | EventStoreGossipClusterOptions | EventStoreSingleNodeOptions,
+    options:
+      | EventStoreConnectionStringOptions
+      | EventStoreDnsClusterOptions
+      | EventStoreGossipClusterOptions
+      | EventStoreSingleNodeOptions,
     eventStoreBusConfigs: EventStoreBusConfig[],
   ): DynamicModule {
     const eventBusProvider = this.createEventBusProviders(eventStoreBusConfigs);

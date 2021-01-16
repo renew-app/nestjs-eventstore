@@ -16,7 +16,11 @@ import { EventStoreClient } from './client';
 })
 export class EventStoreModule {
   static forRoot(
-    options: EventStoreConnectionStringOptions | EventStoreDnsClusterOptions | EventStoreGossipClusterOptions | EventStoreSingleNodeOptions,
+    options:
+      | EventStoreConnectionStringOptions
+      | EventStoreDnsClusterOptions
+      | EventStoreGossipClusterOptions
+      | EventStoreSingleNodeOptions,
   ): DynamicModule {
     const connectionProviders = [
       {

@@ -29,7 +29,11 @@ export class EventStoreClient {
 
   constructor(
     @Inject(EVENT_STORE_CONNECTION_OPTIONS)
-    options: EventStoreConnectionStringOptions | EventStoreDnsClusterOptions | EventStoreGossipClusterOptions | EventStoreSingleNodeOptions,
+    options:
+      | EventStoreConnectionStringOptions
+      | EventStoreDnsClusterOptions
+      | EventStoreGossipClusterOptions
+      | EventStoreSingleNodeOptions,
   ) {
     try {
       if (options) {
@@ -37,14 +41,29 @@ export class EventStoreClient {
           const { connectionString, parts } = options as EventStoreConnectionStringOptions;
           this.client = EventStoreDBClient.connectionString(connectionString, ...parts);
         } else {
-          const { connectionSettings, channelCredentials, defaultUserCredentials } = (options as EventStoreDnsClusterOptions | EventStoreGossipClusterOptions | EventStoreSingleNodeOptions);
+          const { connectionSettings, channelCredentials, defaultUserCredentials } = options as
+            | EventStoreDnsClusterOptions
+            | EventStoreGossipClusterOptions
+            | EventStoreSingleNodeOptions;
 
           if ((connectionSettings as DnsClusterOptions).discover) {
-            this.client = new EventStoreDBClient(connectionSettings as DnsClusterOptions, channelCredentials, defaultUserCredentials);
+            this.client = new EventStoreDBClient(
+              connectionSettings as DnsClusterOptions,
+              channelCredentials,
+              defaultUserCredentials,
+            );
           } else if ((connectionSettings as GossipClusterOptions).endpoints) {
-            this.client = new EventStoreDBClient(connectionSettings as GossipClusterOptions, channelCredentials, defaultUserCredentials);
+            this.client = new EventStoreDBClient(
+              connectionSettings as GossipClusterOptions,
+              channelCredentials,
+              defaultUserCredentials,
+            );
           } else if ((connectionSettings as SingleNodeOptions).endpoint) {
-            this.client = new EventStoreDBClient(connectionSettings as SingleNodeOptions, channelCredentials, defaultUserCredentials);
+            this.client = new EventStoreDBClient(
+              connectionSettings as SingleNodeOptions,
+              channelCredentials,
+              defaultUserCredentials,
+            );
           } else {
             throw Error('The connectionSettings property appears to be incomplete or malformed.');
           }
