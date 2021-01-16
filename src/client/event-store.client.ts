@@ -22,7 +22,7 @@ import {
   EventStoreDnsClusterOptions,
   EventStoreEvent,
   EventStoreGossipClusterOptions,
-  EventStoreSingleNodeOptions
+  EventStoreSingleNodeOptions,
 } from '../interfaces';
 
 export class EventStoreClient {

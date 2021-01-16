@@ -1,8 +1,18 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
+import {
+  EVENT_STORE_CONN_STRING_OPTIONS,
+  EVENT_STORE_DNS_CLUSTER_OPTIONS,
+  EVENT_STORE_GOSSIP_CLUSTER_OPTIONS,
+  EVENT_STORE_SINGLE_NODE_OPTIONS,
+} from './event-store.constants';
+import {
+  EventStoreConnectionStringOptions,
+  EventStoreDnsClusterOptions,
+  EventStoreGossipClusterOptions,
+  EventStoreSingleNodeOptions,
+} from './interfaces';
 
-import { EVENT_STORE_OPTIONS } from './event-store.constants';
 import { EventStoreClient } from './client';
-import { EventStoreOptions } from './interfaces';
 
 @Global()
 @Module({
@@ -10,13 +20,38 @@ import { EventStoreOptions } from './interfaces';
   exports: [EventStoreClient],
 })
 export class EventStoreModule {
-  static forRoot(options: EventStoreOptions): DynamicModule {
-    const configProvider = {
-      provide: EVENT_STORE_OPTIONS,
-      useValue: {
-        ...options,
+  static forRoot(
+    connStringOptions?: EventStoreConnectionStringOptions,
+    dnsClusterOptions?: EventStoreDnsClusterOptions,
+    gossipClusterOptions?: EventStoreGossipClusterOptions,
+    singleNodeOptions?: EventStoreSingleNodeOptions,
+  ): DynamicModule {
+    const connectionProviders = [
+      {
+        provide: EVENT_STORE_CONN_STRING_OPTIONS,
+        useValue: {
+          ...connStringOptions,
+        },
       },
-    };
+      {
+        provide: EVENT_STORE_DNS_CLUSTER_OPTIONS,
+        useValue: {
+          ...dnsClusterOptions,
+        },
+      },
+      {
+        provide: EVENT_STORE_GOSSIP_CLUSTER_OPTIONS,
+        useValue: {
+          ...gossipClusterOptions,
+        },
+      },
+      {
+        provide: EVENT_STORE_SINGLE_NODE_OPTIONS,
+        useValue: {
+          ...singleNodeOptions,
+        },
+      },
+    ];
 
     const clientProvider = {
       provide: EventStoreClient,
@@ -25,8 +60,8 @@ export class EventStoreModule {
 
     return {
       module: EventStoreModule,
-      providers: [configProvider, clientProvider],
-      exports: [configProvider, clientProvider],
+      providers: [...connectionProviders, clientProvider],
+      exports: [...connectionProviders, clientProvider],
     };
   }
 }
