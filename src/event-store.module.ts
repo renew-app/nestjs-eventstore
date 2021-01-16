@@ -1,17 +1,12 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
 import {
-  EVENT_STORE_CONN_STRING_OPTIONS,
-  EVENT_STORE_DNS_CLUSTER_OPTIONS,
-  EVENT_STORE_GOSSIP_CLUSTER_OPTIONS,
-  EVENT_STORE_SINGLE_NODE_OPTIONS,
-} from './event-store.constants';
-import {
   EventStoreConnectionStringOptions,
   EventStoreDnsClusterOptions,
   EventStoreGossipClusterOptions,
   EventStoreSingleNodeOptions,
 } from './interfaces';
 
+import { EVENT_STORE_CONNECTION_OPTIONS } from './event-store.constants';
 import { EventStoreClient } from './client';
 
 @Global()
@@ -21,34 +16,13 @@ import { EventStoreClient } from './client';
 })
 export class EventStoreModule {
   static forRoot(
-    connStringOptions?: EventStoreConnectionStringOptions,
-    dnsClusterOptions?: EventStoreDnsClusterOptions,
-    gossipClusterOptions?: EventStoreGossipClusterOptions,
-    singleNodeOptions?: EventStoreSingleNodeOptions,
+    options: EventStoreConnectionStringOptions | EventStoreDnsClusterOptions | EventStoreGossipClusterOptions | EventStoreSingleNodeOptions,
   ): DynamicModule {
     const connectionProviders = [
       {
-        provide: EVENT_STORE_CONN_STRING_OPTIONS,
+        provide: EVENT_STORE_CONNECTION_OPTIONS,
         useValue: {
-          ...connStringOptions,
-        },
-      },
-      {
-        provide: EVENT_STORE_DNS_CLUSTER_OPTIONS,
-        useValue: {
-          ...dnsClusterOptions,
-        },
-      },
-      {
-        provide: EVENT_STORE_GOSSIP_CLUSTER_OPTIONS,
-        useValue: {
-          ...gossipClusterOptions,
-        },
-      },
-      {
-        provide: EVENT_STORE_SINGLE_NODE_OPTIONS,
-        useValue: {
-          ...singleNodeOptions,
+          ...options,
         },
       },
     ];

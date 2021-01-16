@@ -8,16 +8,13 @@ import {
   StreamSubscription,
   WriteResult,
 } from '@eventstore/db-client';
+import { GossipClusterOptions, SingleNodeOptions } from '@eventstore/db-client/dist/Client';
 import { PersistentSubscriptionSettings } from '@eventstore/db-client/dist/utils';
 import { Inject, Logger } from '@nestjs/common';
 import { Guid } from 'guid-typescript';
+import { EVENT_STORE_CONNECTION_OPTIONS } from '../event-store.constants';
 import {
-  EVENT_STORE_CONN_STRING_OPTIONS,
-  EVENT_STORE_DNS_CLUSTER_OPTIONS,
-  EVENT_STORE_GOSSIP_CLUSTER_OPTIONS,
-  EVENT_STORE_SINGLE_NODE_OPTIONS,
-} from '../event-store.constants';
-import {
+  DnsClusterOptions,
   EventStoreConnectionStringOptions,
   EventStoreDnsClusterOptions,
   EventStoreEvent,
@@ -31,24 +28,27 @@ export class EventStoreClient {
   private client: EventStoreDBClient;
 
   constructor(
-    @Inject(EVENT_STORE_CONN_STRING_OPTIONS) connStringOptions: EventStoreConnectionStringOptions,
-    @Inject(EVENT_STORE_DNS_CLUSTER_OPTIONS) dnsClusterOptions: EventStoreDnsClusterOptions,
-    @Inject(EVENT_STORE_GOSSIP_CLUSTER_OPTIONS) gossipClusterOptions: EventStoreGossipClusterOptions,
-    @Inject(EVENT_STORE_SINGLE_NODE_OPTIONS) singleNodeOptions: EventStoreSingleNodeOptions,
+    @Inject(EVENT_STORE_CONNECTION_OPTIONS)
+    options: EventStoreConnectionStringOptions | EventStoreDnsClusterOptions | EventStoreGossipClusterOptions | EventStoreSingleNodeOptions,
   ) {
     try {
-      if (connStringOptions) {
-        const { connectionString, parts } = connStringOptions;
-        this.client = EventStoreDBClient.connectionString(connectionString, ...parts);
-      } else if (dnsClusterOptions) {
-        const { connectionSettings, channelCredentials, defaultUserCredentials } = dnsClusterOptions;
-        this.client = new EventStoreDBClient(connectionSettings, channelCredentials, defaultUserCredentials);
-      } else if (gossipClusterOptions) {
-        const { connectionSettings, channelCredentials, defaultUserCredentials } = gossipClusterOptions;
-        this.client = new EventStoreDBClient(connectionSettings, channelCredentials, defaultUserCredentials);
-      } else if (singleNodeOptions) {
-        const { connectionSettings, channelCredentials, defaultUserCredentials } = singleNodeOptions;
-        this.client = new EventStoreDBClient(connectionSettings, channelCredentials, defaultUserCredentials);
+      if (options) {
+        if ((options as EventStoreConnectionStringOptions).connectionString) {
+          const { connectionString, parts } = options as EventStoreConnectionStringOptions;
+          this.client = EventStoreDBClient.connectionString(connectionString, ...parts);
+        } else {
+          const { connectionSettings, channelCredentials, defaultUserCredentials } = (options as EventStoreDnsClusterOptions | EventStoreGossipClusterOptions | EventStoreSingleNodeOptions);
+
+          if ((connectionSettings as DnsClusterOptions).discover) {
+            this.client = new EventStoreDBClient(connectionSettings as DnsClusterOptions, channelCredentials, defaultUserCredentials);
+          } else if ((connectionSettings as GossipClusterOptions).endpoints) {
+            this.client = new EventStoreDBClient(connectionSettings as GossipClusterOptions, channelCredentials, defaultUserCredentials);
+          } else if ((connectionSettings as SingleNodeOptions).endpoint) {
+            this.client = new EventStoreDBClient(connectionSettings as SingleNodeOptions, channelCredentials, defaultUserCredentials);
+          } else {
+            throw Error('The connectionSettings property appears to be incomplete or malformed.');
+          }
+        }
       } else {
         throw Error('Connection information not provided.');
       }

@@ -3,7 +3,13 @@ import 'reflect-metadata';
 import { CommandBus, EventBus, QueryBus } from '@nestjs/cqrs';
 import { DynamicModule, Global, Logger, Module, OnModuleInit, Provider } from '@nestjs/common';
 import { EventStoreBusConfig, EventStoreBusProvider } from '.';
-import { EventStoreConnectionStringOptions, IEventConstructors } from './interfaces';
+import {
+  EventStoreConnectionStringOptions,
+  EventStoreDnsClusterOptions,
+  EventStoreGossipClusterOptions,
+  EventStoreSingleNodeOptions,
+  IEventConstructors
+} from './interfaces';
 
 import { EventStoreClient } from './client';
 import { EventStoreModule } from './event-store.module';
@@ -21,7 +27,7 @@ export class EventStoreCoreModule implements OnModuleInit {
     private readonly eventsBus: EventBus,
     private readonly commandsBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) {}
+  ) { }
 
   onModuleInit() {
     const { events, queries, sagas, commands } = this.explorerService.explore();
@@ -32,7 +38,7 @@ export class EventStoreCoreModule implements OnModuleInit {
   }
 
   static forRoot(
-    options: EventStoreConnectionStringOptions,
+    options: EventStoreConnectionStringOptions | EventStoreDnsClusterOptions | EventStoreGossipClusterOptions | EventStoreSingleNodeOptions,
     eventStoreBusConfigs: EventStoreBusConfig[],
   ): DynamicModule {
     const eventBusProvider = this.createEventBusProviders(eventStoreBusConfigs);

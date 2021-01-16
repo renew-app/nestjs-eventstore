@@ -8,7 +8,7 @@ declare type NodePreference = typeof RANDOM | typeof FOLLOWER | typeof LEADER;
 interface Endpoint {
   address: string;
   port: number;
-}
+};
 
 interface ChannelCredentialOptions {
   insecure?: boolean;
@@ -16,31 +16,31 @@ interface ChannelCredentialOptions {
   privateKey?: Buffer;
   certChain?: Buffer;
   verifyOptions?: Parameters<typeof ChannelCredentials.createSsl>[3];
-}
+};
 
 interface Credentials {
   username: string;
   password: string;
-}
+};
 
-interface DnsClusterOptions {
+export interface DnsClusterOptions {
   discover: Endpoint;
   nodePreference?: NodePreference;
-}
+};
 
-interface GossipClusterOptions {
+export interface GossipClusterOptions {
   endpoints: Endpoint[];
   nodePreference?: NodePreference;
-}
+};
 
-interface SingleNodeOptions {
+export interface SingleNodeOptions {
   endpoint: Endpoint | string;
-}
+};
 
 export interface EventStoreConnectionStringOptions {
   connectionString: TemplateStringsArray | string;
   parts: string[];
-}
+};
 
 export interface EventStoreDnsClusterOptions {
   connectionSettings: DnsClusterOptions;
