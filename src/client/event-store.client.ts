@@ -39,7 +39,7 @@ export class EventStoreClient {
       if (options) {
         if ((options as EventStoreConnectionStringOptions).connectionString) {
           const { connectionString, parts } = options as EventStoreConnectionStringOptions;
-          this.client = EventStoreDBClient.connectionString(connectionString, ...parts);
+          this.client = EventStoreDBClient.connectionString(connectionString, ...(parts || []));
         } else {
           const { connectionSettings, channelCredentials, defaultUserCredentials } = options as
             | EventStoreDnsClusterOptions

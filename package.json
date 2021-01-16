@@ -1,6 +1,6 @@
 {
   "name": "@renewapp/nestjs-eventstore",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "An implementation of the @eventstore/db-client for the Nestjs framework and working in cooperation with the built-in Nestjs CQRS infrastructure.",
   "main": "lib/index.js",
   "types": "lib/**/*.d.ts",
@@ -36,7 +36,7 @@
   "homepage": "https://github.com/renew-app/nestjs-eventstore#readme",
   "devDependencies": {
     "@types/debug": "^4.1.5",
-    "@types/jest": "^26.0.19",
+    "@types/jest": "^26.0.20",
     "google-protobuf": "^3.14.0",
     "jest": "^26.6.3",
     "prettier": "^2.2.1",

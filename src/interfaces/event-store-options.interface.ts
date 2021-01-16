@@ -5,12 +5,12 @@ declare const FOLLOWER = 'follower';
 declare const LEADER = 'leader';
 declare type NodePreference = typeof RANDOM | typeof FOLLOWER | typeof LEADER;
 
-interface Endpoint {
+export interface Endpoint {
   address: string;
   port: number;
 }
 
-interface ChannelCredentialOptions {
+export interface ChannelCredentialOptions {
   insecure?: boolean;
   rootCertificate?: Buffer;
   privateKey?: Buffer;
@@ -18,7 +18,7 @@ interface ChannelCredentialOptions {
   verifyOptions?: Parameters<typeof ChannelCredentials.createSsl>[3];
 }
 
-interface Credentials {
+export interface Credentials {
   username: string;
   password: string;
 }
@@ -39,7 +39,7 @@ export interface SingleNodeOptions {
 
 export interface EventStoreConnectionStringOptions {
   connectionString: TemplateStringsArray | string;
-  parts: string[];
+  parts?: string[];
 }
 
 export interface EventStoreDnsClusterOptions {
