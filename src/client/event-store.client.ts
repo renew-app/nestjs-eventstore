@@ -11,38 +11,50 @@ import {
 import { PersistentSubscriptionSettings } from '@eventstore/db-client/dist/utils';
 import { Inject, Logger } from '@nestjs/common';
 import { Guid } from 'guid-typescript';
-import { EVENT_STORE_OPTIONS } from '../event-store.constants';
-import { EventStoreEvent, EventStoreOptions } from '../interfaces';
+import {
+  EVENT_STORE_CONN_STRING_OPTIONS,
+  EVENT_STORE_DNS_CLUSTER_OPTIONS,
+  EVENT_STORE_GOSSIP_CLUSTER_OPTIONS,
+  EVENT_STORE_SINGLE_NODE_OPTIONS,
+} from '../event-store.constants';
+import {
+  EventStoreConnectionStringOptions,
+  EventStoreDnsClusterOptions,
+  EventStoreEvent,
+  EventStoreGossipClusterOptions,
+  EventStoreSingleNodeOptions
+} from '../interfaces';
 
 export class EventStoreClient {
   [x: string]: any;
   private logger: Logger = new Logger(this.constructor.name);
   private client: EventStoreDBClient;
 
-  constructor(@Inject(EVENT_STORE_OPTIONS) options: EventStoreOptions) {
+  constructor(
+    @Inject(EVENT_STORE_CONN_STRING_OPTIONS) connStringOptions: EventStoreConnectionStringOptions,
+    @Inject(EVENT_STORE_DNS_CLUSTER_OPTIONS) dnsClusterOptions: EventStoreDnsClusterOptions,
+    @Inject(EVENT_STORE_GOSSIP_CLUSTER_OPTIONS) gossipClusterOptions: EventStoreGossipClusterOptions,
+    @Inject(EVENT_STORE_SINGLE_NODE_OPTIONS) singleNodeOptions: EventStoreSingleNodeOptions,
+  ) {
     try {
-      const {
-        connectionSettings,
-        insecure,
-        certChain,
-        rootCertificate,
-        verifyOptions,
-        defaultUserCredentials,
-      } = options;
-
-      this.client = new EventStoreDBClient(
-        connectionSettings,
-        {
-          insecure,
-          certChain,
-          rootCertificate,
-          verifyOptions,
-        },
-        defaultUserCredentials,
-      );
+      if (connStringOptions) {
+        const { connectionString, parts } = connStringOptions;
+        this.client = EventStoreDBClient.connectionString(connectionString, ...parts);
+      } else if (dnsClusterOptions) {
+        const { connectionSettings, channelCredentials, defaultUserCredentials } = dnsClusterOptions;
+        this.client = new EventStoreDBClient(connectionSettings, channelCredentials, defaultUserCredentials);
+      } else if (gossipClusterOptions) {
+        const { connectionSettings, channelCredentials, defaultUserCredentials } = gossipClusterOptions;
+        this.client = new EventStoreDBClient(connectionSettings, channelCredentials, defaultUserCredentials);
+      } else if (singleNodeOptions) {
+        const { connectionSettings, channelCredentials, defaultUserCredentials } = singleNodeOptions;
+        this.client = new EventStoreDBClient(connectionSettings, channelCredentials, defaultUserCredentials);
+      } else {
+        throw Error('Connection information not provided.');
+      }
     } catch (e) {
       this.logger.error(e);
-      throw new Error(e);
+      throw e;
     }
   }
 
