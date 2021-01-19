@@ -163,6 +163,12 @@ export class EventStoreBus implements OnModuleDestroy {
 
   async publish(event: IEvent, stream?: string) {
     try {
+      this.logger.debug({
+        message: `Publishing event`,
+        event,
+        stream,
+      });
+
       this.client.writeEventToStream(stream || '$svc-catch-all', event.constructor.name, event);
     } catch (e) {
       this.logger.error(e);
@@ -172,6 +178,11 @@ export class EventStoreBus implements OnModuleDestroy {
 
   async publishAll(events: IEvent[], stream?: string) {
     try {
+      this.logger.debug({
+        message: `Publishing events`,
+        events,
+        stream,
+      });
       this.client.writeEventsToStream(
         stream || '$svc.catch-all',
         events.map((ev) => {
