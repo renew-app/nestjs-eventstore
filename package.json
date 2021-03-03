@@ -1,6 +1,6 @@
 {
   "name": "@renewapp/nestjs-eventstore",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "An implementation of the @eventstore/db-client for the Nestjs framework and working in cooperation with the built-in Nestjs CQRS infrastructure.",
   "main": "lib/index.js",
   "types": "lib/**/*.d.ts",
@@ -13,8 +13,7 @@
     "prepublishOnly": "npm test && npm run lint",
     "preversion": "npm run lint",
     "version": "npm run format && git add -A src",
-    "postversion": "git push && git push --tags",
-    "postinstall": "tsc --outDir ./build"
+    "postversion": "git push && git push --tags"
   },
   "repository": {
     "type": "git",
