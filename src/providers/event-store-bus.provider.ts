@@ -102,16 +102,12 @@ export class EventStoreBusProvider extends ObservableBus<IEvent> implements OnMo
   }
 
   protected registerSaga(saga: ISaga) {
-    this.logger.log(saga);
-    this.logger.log(isFunction(saga));
-
     if (!isFunction(saga)) {
       throw new InvalidSagaException();
     }
 
     const stream$ = saga(this);
 
-    this.logger.log(stream$);
     this.logger.log(stream$ instanceof Observable);
 
     if (!(stream$ instanceof Observable)) {

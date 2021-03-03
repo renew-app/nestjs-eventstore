@@ -1,6 +1,6 @@
 {
   "name": "@renewapp/nestjs-eventstore",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "An implementation of the @eventstore/db-client for the Nestjs framework and working in cooperation with the built-in Nestjs CQRS infrastructure.",
   "main": "lib/index.js",
   "types": "lib/**/*.d.ts",
