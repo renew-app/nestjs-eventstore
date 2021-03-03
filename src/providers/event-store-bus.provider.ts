@@ -9,7 +9,7 @@ import {
   ObservableBus,
 } from '@nestjs/cqrs';
 import { EVENTS_HANDLER_METADATA, SAGA_METADATA } from '@nestjs/cqrs/dist/decorators/constants';
-import { Injectable, OnModuleDestroy, Type } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, Type } from '@nestjs/common';
 import { Observable, Subscription } from 'rxjs';
 
 import { EventStoreBus } from '../event-store.bus';
@@ -23,6 +23,7 @@ import { isFunction } from 'util';
 export class EventStoreBusProvider extends ObservableBus<IEvent> implements OnModuleDestroy {
   private _publisher: EventStoreBus;
   private readonly subscriptions: Subscription[];
+  private readonly logger = new Logger(this.constructor.name);
 
   constructor(
     private readonly commandBus: CommandBus,
@@ -101,11 +102,18 @@ export class EventStoreBusProvider extends ObservableBus<IEvent> implements OnMo
   }
 
   protected registerSaga(saga: ISaga) {
+    this.logger.log(saga);
+    this.logger.log(isFunction(saga));
+
     if (!isFunction(saga)) {
       throw new InvalidSagaException();
     }
 
     const stream$ = saga(this);
+
+    this.logger.log(stream$);
+    this.logger.log(stream$ instanceof Observable);
+
     if (!(stream$ instanceof Observable)) {
       throw new InvalidSagaException();
     }
