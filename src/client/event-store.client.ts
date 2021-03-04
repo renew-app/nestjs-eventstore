@@ -1,12 +1,12 @@
 import {
+  AppendResult,
   END,
   EventStoreDBClient,
-  JSONEventData,
+  jsonEvent,
   PersistentSubscription,
   ReadRevision,
   START,
   StreamSubscription,
-  WriteResult,
 } from '@eventstore/db-client';
 import { GossipClusterOptions, SingleNodeOptions } from '@eventstore/db-client/dist/Client';
 import { PersistentSubscriptionSettings } from '@eventstore/db-client/dist/utils';
@@ -77,26 +77,28 @@ export class EventStoreClient {
     }
   }
 
-  async writeEventToStream(streamName: string, eventType: string, payload: any, metadata?: any): Promise<WriteResult> {
-    return this.client.writeEventsToStream(streamName, {
-      contentType: 'application/json',
-      eventType,
+  async writeEventToStream(streamName: string, eventType: string, payload: any, metadata?: any): Promise<AppendResult> {
+    const event = jsonEvent({
       id: Guid.create().toString(),
-      payload,
+      type: eventType,
+      data: payload,
       metadata,
-    } as JSONEventData);
+    });
+
+    return this.client.appendToStream(streamName, event);
   }
 
-  async writeEventsToStream(streamName: string, events: EventStoreEvent[]): Promise<WriteResult> {
-    return this.client.writeEventsToStream(
-      streamName,
-      events.map((ev) => {
-        return {
-          ...ev,
-          id: Guid.create().toString(),
-        } as JSONEventData;
-      }),
-    );
+  async writeEventsToStream(streamName: string, events: EventStoreEvent[]): Promise<AppendResult> {
+    const jsonEvents = events.map((e) => {
+      return jsonEvent({
+        id: Guid.create().toString(),
+        type: e.eventType,
+        data: e.payload,
+        metadata: e.metadata,
+      });
+    });
+
+    return this.client.appendToStream(streamName, [...jsonEvents]);
   }
 
   async createPersistentSubscription(
@@ -117,14 +119,14 @@ export class EventStoreClient {
   async subscribeToCatchupSubscription(streamName: string, fromRevision?: ReadRevision): Promise<StreamSubscription> {
     return this.client.subscribeToStream(streamName, {
       fromRevision: fromRevision || START,
-      resolveLinks: true,
+      resolveLinkTos: true,
     });
   }
 
   async subscribeToVolatileSubscription(streamName: string): Promise<StreamSubscription> {
     return this.client.subscribeToStream(streamName, {
       fromRevision: END,
-      resolveLinks: true,
+      resolveLinkTos: true,
     });
   }
 }

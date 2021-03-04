@@ -74,7 +74,7 @@ export class EventStoreBus implements OnModuleDestroy {
     subscriptions: EsPersistentSubscription[],
   ): Promise<ExtendedPersistentSubscription[]> {
     const settings: PersistentSubscriptionSettings = persistentSubscriptionSettingsFromDefaults({
-      resolveLinks: true,
+      resolveLinkTos: true,
     });
 
     try {
@@ -203,15 +203,14 @@ export class EventStoreBus implements OnModuleDestroy {
     try {
       const resolved = (await this.client.subscribeToCatchupSubscription(stream)) as ExtendedCatchUpSubscription;
 
-      resolved.on('end', () => {
-        this.logger.verbose(`Stream ${stream} completed catch-up processing`);
-      });
-
-      resolved.on('error', (err) => {
-        this.logger.error(`[${stream}] ${err.message} ${err.stack}`);
-      });
-
-      resolved.on('event', (ev) => this.onEvent(ev));
+      resolved
+        .on('data', (ev: ResolvedEvent) => this.onEvent(ev))
+        .on('confirmation', () => this.logger.log(`[${stream}] Catch-Up subscription confirmation`))
+        .on('close', () => this.logger.log(`[${stream}] Subscription closed`))
+        .on('error', (err: Error) => {
+          this.logger.error({ stream, error: err, msg: `Subscription error` });
+          this.onDropped(resolved);
+        });
 
       this.logger.verbose(`Catching up and subscribing to stream ${stream}`);
       resolved.isLive = true;
@@ -233,28 +232,35 @@ export class EventStoreBus implements OnModuleDestroy {
         subscriptionName,
       )) as ExtendedPersistentSubscription;
 
-      resolved.on('close', () => {
-        this.logger.verbose(
-          `Connection to persistent subscription ${subscriptionName} on stream ${stream} closed, attempting to reconnect.`,
-        );
-        this.onDropped(resolved);
-        if (resolved.isPaused) {
-          resolved.resume();
-        }
-      });
-
-      resolved.on('error', (err) => {
-        this.logger.error(`[${stream}][${subscriptionName}] ${err.message} ${err.stack}`);
-      });
-
-      resolved.on('event', async (ev) => {
-        try {
-          await this.onEvent(ev);
-          resolved.ack(ev?.event?.id || '');
-        } catch (e) {
-          resolved.nack('park', e, ev?.event?.id || '');
-        }
-      });
+      resolved
+        .on('data', (ev: ResolvedEvent) => {
+          try {
+            this.onEvent(ev);
+            resolved.ack(ev.event?.id || '');
+          } catch (err) {
+            this.logger.error({
+              error: err,
+              msg: `Error handling event`,
+              event: ev,
+              stream,
+              subscriptionName,
+            });
+            resolved.nack('retry', err, ev.event?.id || '');
+          }
+        })
+        .on('confirmation', () =>
+          this.logger.log(`[${stream}][${subscriptionName}] Persistent subscription confirmation`),
+        )
+        .on('close', () => {
+          this.logger.log(`[${stream}][${subscriptionName}] Persistent subscription closed`);
+          this.onDropped(resolved);
+          this.reSubscribeToPersistentSubscription(stream, subscriptionName);
+        })
+        .on('error', (err: Error) => {
+          this.logger.error({ stream, subscriptionName, error: err, msg: `Persistent subscription error` });
+          this.onDropped(resolved);
+          this.reSubscribeToPersistentSubscription(stream, subscriptionName);
+        });
 
       this.logger.verbose(`Connection to persistent subscription ${subscriptionName} on stream ${stream} established.`);
       resolved.isLive = true;
@@ -266,7 +272,7 @@ export class EventStoreBus implements OnModuleDestroy {
     }
   }
 
-  async onEvent(payload: ResolvedEvent) {
+  onEvent(payload: ResolvedEvent) {
     const { event } = payload;
 
     if (!event || !event.isJson) {
@@ -274,22 +280,22 @@ export class EventStoreBus implements OnModuleDestroy {
       return;
     }
 
-    const { eventType, id, streamId, data } = event;
+    const { type, id, streamId, data } = event;
 
-    const handler = this.eventHandlers[eventType];
+    const handler = this.eventHandlers[type];
 
     if (!handler) {
-      this.logger.warn(`Received event that could not be handled: ${eventType}:${id}:${streamId}`);
+      this.logger.warn(`Received event that could not be handled: ${type}:${id}:${streamId}`);
       return;
     }
 
     const rawData = JSON.parse(JSON.stringify(data));
     const parsedData = Object.values(rawData);
 
-    if (this.eventHandlers && this.eventHandlers[eventType || rawData.content.eventType]) {
-      this.subject$.next(this.eventHandlers[eventType || rawData.content.eventType](...parsedData));
+    if (this.eventHandlers && this.eventHandlers[type || rawData.content.eventType]) {
+      this.subject$.next(this.eventHandlers[type || rawData.content.eventType](...parsedData));
     } else {
-      this.logger.warn(`Event of type ${eventType} not able to be handled.`);
+      this.logger.warn(`Event of type ${type} not able to be handled.`);
     }
   }
 
