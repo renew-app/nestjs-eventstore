@@ -173,7 +173,7 @@ workflows:
               only:
                 - main
                 - develop
-      - release:
+      - deploy:
           requires:
             - build
           filters:
