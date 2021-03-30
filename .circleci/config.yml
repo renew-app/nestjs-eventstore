@@ -1,0 +1,164 @@
+defaults: &defaults
+  docker:
+    - image: circleci/node:12.13.0
+  working_directory: ~/repo
+  context: Global
+
+whitelist: &whitelist
+  paths:
+    - .npmignore
+    - .gitignore
+    - coverage/*
+    - dist/*
+    - node_modules/*
+    - src/*
+    - test/*
+    - CODE_OF_CONDUCT.md
+    - LICENSE.md
+    - package.json
+    - README.md
+    - tsconfig.json
+    - tslint.json
+    - .git/*
+    - jestconfig.json
+
+ssh_fingerprint: &ssh_fingerprint
+  run:
+    name: ssh fingerprint
+    command: |
+      mkdir ~/.ssh/ && echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+      GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa_fingerprint'
+
+version: 2
+jobs:
+  checkout:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-
+      - run:
+          name: Install Dependencies
+          command: npm install
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+      - persist_to_workspace:
+          root: ~/repo
+          <<: *whitelist
+  lint:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Lint TypeScript code
+          command: npm run lint
+  test:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Test TypeScript code
+          command: npm run test
+      - persist_to_workspace:
+          root: ~/repo
+          <<: *whitelist
+  build:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Build TypeScript code
+          command: npm run build
+      - persist_to_workspace:
+          root: ~/repo
+          <<: *whitelist
+  release:
+    <<: *defaults
+    steps:
+      - *ssh_fingerprint
+      - add_ssh_keys:
+          fingerprints:
+            - $FINGERPRINT
+      - attach_workspace:
+            at: ~/repo
+      - run:
+          name: install autotag binary
+          command: |
+            curl -sL https://git.io/autotag-install | sudo sh -s -- -b /usr/bin
+      - run:
+          name: increment version
+          command: |
+            AUTOTAG=$(autotag -b ${CIRCLE_BRANCH} -v)
+      - run:
+          name: authenticate github
+          command: |
+            rm -rf /home/circleci/.git/index.lock
+            git init
+            git config --global user.email "${GIT_AUTHOR_EMAIL}"
+            git config --global user.name "${GIT_AUTHOR_NAME}"
+      - run:
+          name: push to github
+          command: |
+            git push --tags
+
+workflows:
+  version: 2
+
+  build-test-release:
+    jobs:
+      - checkout:
+          filters:
+            tags:
+              ignore: /v[0-9]+(\.[0-9]+)*/
+            branches:
+              only:
+                - main
+                - develop
+      - test:
+          requires:
+            - checkout
+          filters:
+            tags:
+              ignore: /v[0-9]+(\.[0-9]+)*/
+            branches:
+              only:
+                - main
+                - develop
+      - lint:
+          requires:
+            - checkout
+          filters:
+            tags:
+              ignore: /v[0-9]+(\.[0-9]+)*/
+            branches:
+              only:
+                - main
+                - develop
+      - build:
+          requires:
+            - test
+            - lint
+          filters:
+            tags:
+              ignore: /v[0-9]+(\.[0-9]+)*/
+            branches:
+              only:
+                - main
+                - develop
+      - release:
+          requires:
+            - build
+          filters:
+            tags:
+              ignore: /v[0-9]+(\.[0-9]+)*/
+            branches:
+              only:
+                - main
+                - develop
