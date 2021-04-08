@@ -1,6 +1,6 @@
 defaults: &defaults
   docker:
-    - image: circleci/node:15.13.0
+    - image: node:15.13.0
   working_directory: ~/repo
   context: Global
 
@@ -88,6 +88,10 @@ jobs:
             - $FINGERPRINT
       - attach_workspace:
             at: ~/repo
+      - run:
+          name: install sudo
+          command: |
+            apt-get update && apt-get install -y sudo
       - run:
           name: install autotag binary
           command: |
