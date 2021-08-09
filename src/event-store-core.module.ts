@@ -76,6 +76,7 @@ export class EventStoreCoreModule implements OnModuleInit {
   private static createEventBusProviders(configs: EventStoreBusConfig[]): Provider {
     let events: IEventConstructors = {};
     configs.forEach((c) => {
+      console.log(c);
       events = {
         ...events,
         ...c.events,
