@@ -17,7 +17,6 @@ import { EventStoreBusConfig } from '..';
 import { EventStoreClient } from '../client';
 import { ModuleRef } from '@nestjs/core';
 import { filter } from 'rxjs/operators';
-import { isFunction } from 'util';
 
 @Injectable()
 export class EventStoreBusProvider extends ObservableBus<IEvent> implements OnModuleDestroy {
@@ -50,10 +49,12 @@ export class EventStoreBusProvider extends ObservableBus<IEvent> implements OnMo
   }
 
   publish<T extends IEvent>(event: T, stream: string) {
+    console.log("Publish", event, stream);
     this._publisher.publish(event, stream);
   }
 
   publishAll(events: IEvent[]) {
+    console.log("PublishAll", events);
     (events || []).forEach((ev) => this._publisher.publish(ev));
   }
 
@@ -102,7 +103,7 @@ export class EventStoreBusProvider extends ObservableBus<IEvent> implements OnMo
   }
 
   protected registerSaga(saga: ISaga) {
-    if (!isFunction(saga)) {
+    if (!(typeof saga === 'function')) {
       throw new InvalidSagaException();
     }
 

@@ -169,6 +169,12 @@ export class EventStoreBus implements OnModuleDestroy {
         stream,
       });
 
+      console.log({
+        message: `Publishing event`,
+        event,
+        stream,
+      })
+
       this.client.writeEventToStream(stream || '$svc-catch-all', event.constructor.name, event);
     } catch (e) {
       this.logger.error(e);
@@ -183,9 +189,14 @@ export class EventStoreBus implements OnModuleDestroy {
         events,
         stream,
       });
+      console.log({
+        message: `Publishing events`,
+        events,
+        stream,
+      });
       this.client.writeEventsToStream(
         stream || '$svc.catch-all',
-        events.map((ev) => {
+        events.map((event) => {
           return {
             contentType: 'application/json',
             eventType: event?.constructor.name || '',
