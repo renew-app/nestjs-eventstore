@@ -183,7 +183,7 @@ export class EventStoreBus implements OnModuleDestroy {
         events,
         stream,
       });
-      
+
       this.client.writeEventsToStream(
         stream || '$svc.catch-all',
         events.map((event) => {
@@ -233,23 +233,41 @@ export class EventStoreBus implements OnModuleDestroy {
         subscriptionName,
       )) as ExtendedPersistentSubscription;
 
+      for await (const ev of resolved) {
+        if (!ev.event) continue;
+
+        try {
+          this.onEvent(ev);
+          await resolved.ack(ev.event.id);
+        } catch (err) {
+          this.logger.error({
+            error: err,
+            msg: `Error handling event`,
+            event: ev,
+            stream,
+            subscriptionName,
+          });
+          resolved.nack('retry', err, ev.event.id);
+        }
+      }
+
+
       resolved
-        .on('data', (ev: ResolvedEvent) => {
-          try {
-            this.onEvent(ev);
-            this.logger.log(resolved.ack);
-            resolved.ack(ev.event?.id || '');
-          } catch (err) {
-            this.logger.error({
-              error: err,
-              msg: `Error handling event`,
-              event: ev,
-              stream,
-              subscriptionName,
-            });
-            resolved.nack('retry', err, ev.event?.id || '');
-          }
-        })
+        // .on('data', (ev: ResolvedEvent) => {
+        //   try {
+        //     this.onEvent(ev);
+        //     await resolved.ack(ev.event?.id || '');
+        //   } catch (err) {
+        //     this.logger.error({
+        //       error: err,
+        //       msg: `Error handling event`,
+        //       event: ev,
+        //       stream,
+        //       subscriptionName,
+        //     });
+        //     resolved.nack('retry', err, ev.event?.id || '');
+        //   }
+        // })
         .on('confirmation', () =>
           this.logger.log(`[${stream}][${subscriptionName}] Persistent subscription confirmation`),
         )
