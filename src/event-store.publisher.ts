@@ -7,14 +7,16 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class EventStorePublisher {
-  constructor(private readonly eventBus: EventStoreBusProvider) {}
+  constructor(private readonly eventBus: EventStoreBusProvider) { }
 
   mergeClassContext<T extends Constructor<AggregateRoot>>(metatype: T): T {
     const eventBus = this.eventBus;
     return class extends metatype {
       publish(event: IEvent) {
-        console.log("Event", event);
         eventBus.publish(event, (event as AggregateEvent).streamName);
+      }
+      publishAll(events: IEvent[]) {
+        eventBus.publishAll(events);
       }
     };
   }
@@ -22,8 +24,10 @@ export class EventStorePublisher {
   mergeObjectContext<T extends AggregateRoot>(object: T): T {
     const eventBus = this.eventBus;
     object.publish = (event: IEvent) => {
-      console.log("Event", event);
       eventBus.publish(event, (event as AggregateEvent).streamName);
+    };
+    object.publishAll = (events: IEvent[]) => {
+      eventBus.publishAll(events);
     };
     return object;
   }
