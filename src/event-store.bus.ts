@@ -247,7 +247,7 @@ export class EventStoreBus implements OnModuleDestroy {
             stream,
             subscriptionName,
           });
-          resolved.nack('retry', err, ev.event.id);
+          // resolved.nack('retry', err, ev.event.id);
         }
       }
 
