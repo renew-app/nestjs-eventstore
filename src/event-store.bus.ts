@@ -237,6 +237,7 @@ export class EventStoreBus implements OnModuleDestroy {
         .on('data', (ev: ResolvedEvent) => {
           try {
             this.onEvent(ev);
+            this.logger.log(ev);
             resolved.ack(ev.event?.id || '');
           } catch (err) {
             this.logger.error({
