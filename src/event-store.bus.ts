@@ -238,7 +238,7 @@ export class EventStoreBus implements OnModuleDestroy {
 
         try {
           this.onEvent(ev);
-          await resolved.ack(ev.event.id);
+          await resolved.ack(ev.link?.id ?? ev.event.id);
         } catch (err) {
           this.logger.error({
             error: err,
@@ -247,10 +247,9 @@ export class EventStoreBus implements OnModuleDestroy {
             stream,
             subscriptionName,
           });
-          await resolved.nack('retry', err, ev.event.id);
+          await resolved.nack('retry', err, ev.link?.id ?? ev.event.id);
         }
       }
-
 
       resolved
         // .on('data', (ev: ResolvedEvent) => {
