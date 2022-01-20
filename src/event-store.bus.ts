@@ -2,7 +2,7 @@ import {
   ErrorType,
   PersistentSubscriptionSettings,
   persistentSubscriptionSettingsFromDefaults,
-} from '@eventstore/db-client/dist/utils';
+} from '@eventstore/db-client';
 import {
   EventStoreCatchupSubscription as EsCatchUpSubscription,
   EventStorePersistentSubscription as EsPersistentSubscription,

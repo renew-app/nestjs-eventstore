@@ -4,12 +4,12 @@ import {
   EventStoreDBClient,
   jsonEvent,
   PersistentSubscription,
+  PersistentSubscriptionSettings,
   ReadRevision,
   START,
   StreamSubscription,
 } from '@eventstore/db-client';
 import { GossipClusterOptions, SingleNodeOptions } from '@eventstore/db-client/dist/Client';
-import { PersistentSubscriptionSettings } from '@eventstore/db-client/dist/utils';
 import { Inject, Logger } from '@nestjs/common';
 import { Guid } from 'guid-typescript';
 import { EVENT_STORE_CONNECTION_OPTIONS } from '../event-store.constants';
@@ -113,7 +113,7 @@ export class EventStoreClient {
     streamName: string,
     persistentSubscriptionName: string,
   ): Promise<PersistentSubscription> {
-    return this.client.connectToPersistentSubscription(streamName, persistentSubscriptionName);
+    return this.client.subscribeToPersistentSubscription(streamName, persistentSubscriptionName);
   }
 
   async subscribeToCatchupSubscription(streamName: string, fromRevision?: ReadRevision): Promise<StreamSubscription> {
