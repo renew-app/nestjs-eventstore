@@ -46,8 +46,8 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
-    "@eventstore/db-client": "^3.0.0-alpha.1",
-    "@grpc/grpc-js": "^1.3.6",
+    "@eventstore/db-client": "^3.3.1",
+    "@grpc/grpc-js": "^1.6.7",
     "@nestjs/common": "^8.0.4",
     "@nestjs/core": "^8.0.4",
     "@nestjs/cqrs": "^8.0.0",

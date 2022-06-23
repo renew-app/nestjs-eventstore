@@ -170,7 +170,7 @@ export class EventStoreBus implements OnModuleDestroy {
       });
 
       this.client.writeEventToStream(stream || '$svc-catch-all', event.constructor.name, event);
-    } catch (e) {
+    } catch (e: any) {
       this.logger.error(e);
       throw new Error(e);
     }
@@ -194,7 +194,7 @@ export class EventStoreBus implements OnModuleDestroy {
           };
         }),
       );
-    } catch (e) {
+    } catch (e: any) {
       this.logger.error(e);
       throw new Error(e);
     }
@@ -217,7 +217,7 @@ export class EventStoreBus implements OnModuleDestroy {
       resolved.isLive = true;
 
       return resolved;
-    } catch (e) {
+    } catch (e: any) {
       this.logger.error(`[${stream}] ${e.message} ${e.stack}`);
       throw new Error(e);
     }
@@ -238,8 +238,8 @@ export class EventStoreBus implements OnModuleDestroy {
 
         try {
           this.onEvent(ev);
-          await resolved.ack(ev.link?.id ?? ev.event.id);
-        } catch (err) {
+          await resolved.ack(ev);
+        } catch (err: any) {
           this.logger.error({
             error: err,
             msg: `Error handling event`,
@@ -247,7 +247,7 @@ export class EventStoreBus implements OnModuleDestroy {
             stream,
             subscriptionName,
           });
-          await resolved.nack('retry', err, ev.link?.id ?? ev.event.id);
+          await resolved.nack('retry', err, ev);
         }
       }
 
@@ -270,7 +270,7 @@ export class EventStoreBus implements OnModuleDestroy {
       resolved.isLive = true;
 
       return resolved;
-    } catch (e) {
+    } catch (e: any) {
       this.logger.error(`[${stream}][${subscriptionName}] ${e.message} ${e.stack}`);
       throw new Error(e);
     }
