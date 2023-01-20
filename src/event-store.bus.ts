@@ -272,6 +272,7 @@ export class EventStoreBus implements OnModuleDestroy {
       return resolved;
     } catch (e: any) {
       this.logger.error(`[${stream}][${subscriptionName}] ${e.message} ${e.stack}`);
+      this.reSubscribeToPersistentSubscription(stream, subscriptionName);
       throw new Error(e);
     }
   }
