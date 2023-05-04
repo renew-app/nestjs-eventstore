@@ -108,10 +108,10 @@ export class EventStoreBusProvider extends ObservableBus<IEvent> implements OnMo
 
     const stream$ = saga(this);
 
-    this.logger.log(stream$ instanceof Observable);
+    //this.logger.verbose(stream$ instanceof Observable);
 
     // if (!(stream$ instanceof Observable)) {
-    //   throw new InvalidSagaException();
+    //   throw new InvalidSagaException(
     // }
 
     const subscription = stream$.pipe(filter((e) => !!e)).subscribe((command) => this.commandBus.execute(command));
